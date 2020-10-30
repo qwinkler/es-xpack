@@ -22,8 +22,14 @@ docker-compose -f create-certs.yml run --rm create_certs
 docker-compose up -d
 ```
 
+# Watcher
 
-# Watcher example
+Add the webhook url to the keystore:  
+```bash
+echo "https://hooks.slack.com/services/xxx/yyy/zzz" | bin/elasticsearch-keystore add -f --stdin xpack.notification.slack.account.default.secure_url
+```
+
+## Example
 
 ```json
 {
@@ -61,7 +67,7 @@ docker-compose up -d
   "actions": {
     "notify-slack": {
       "slack": {
-        "account": "monitoring",
+        "account": "default",
         "message": {
           "from": "watcher",
           "to": ["#example"],
