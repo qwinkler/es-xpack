@@ -22,6 +22,29 @@ docker-compose -f create-certs.yml run --rm create_certs
 docker-compose up -d
 ```
 
+# Complete example
+
+```bash
+(
+  apt-get update && apt-get install -y git
+  curl https://get.docker.com | bash
+  curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  chmod +x /usr/local/bin/docker-compose
+  ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+)
+git clone https://github.com/qwinkler/es-xpack.git
+cd es-xpack
+cat <<EOT >> .env
+COMPOSE_PROJECT_NAME=es 
+CERTS_DIR=/usr/share/elasticsearch/config/certificates 
+ELASTIC_PASSWORD=changeme
+ELASTIC_VERSION=7.6.1
+EOT
+docker-compose pull
+docker-compose -f create-certs.yml run --rm create_certs
+docker-compose up -d
+```
+
 # Watcher
 
 Add the webhook url to the keystore:  
