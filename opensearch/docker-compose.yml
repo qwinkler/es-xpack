@@ -1,0 +1,50 @@
+version: '3.7'
+
+services:
+  os01:
+    container_name: os01
+    image: opensearchproject/opensearch:${OPENSEARCH_VERSION}
+    environment:
+      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
+      node.name: os01
+      discovery.type: single-node
+      plugins.security.ssl.transport.pemkey_filepath: certificates/os01/os01.key # relative path
+      plugins.security.ssl.transport.pemcert_filepath: certificates/os01/os01.pem
+      plugins.security.ssl.http.pemkey_filepath: certificates/os01/os01.key
+      plugins.security.ssl.http.pemcert_filepath: certificates/os01/os01.pem
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      JAVA_HOME: /usr/share/opensearch/jdk
+      bootstrap.memory_lock: "true" # along with the memlock settings below, disables swapping
+    ulimits: 
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - "os-data1:/usr/share/opensearch/data"
+      - "./opensearch.yml:/usr/share/opensearch/config/opensearch.yml"
+      - "./certs:/usr/share/opensearch/config/certificates:ro"
+    ports:
+      - 9200:9200
+    networks:
+      - os_net
+
+  osd01:
+    image: opensearchproject/opensearch-dashboards:${OPENSEARCH_VERSION}
+    container_name: osd01
+    ports:
+      - 5601:5601
+    volumes:
+      - "./certs:/usr/share/opensearch-dashboards/config/certificates:ro"
+      - "./opensearch-dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml"
+    environment:
+      OPENSEARCH_HOSTS: '["https://os01:9200"]' # must be a string with no spaces when specified as an environment variable
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+    networks:
+      - os_net
+
+volumes:
+  os-data1:
+
+networks:
+  os_net:
+    driver: bridge
